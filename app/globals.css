@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+:root {
+  --bg-deep: #0a0f1a;
+  --bg-panel: #0f1729;
+  --bg-panel-raised: #16213a;
+  --line: #22304d;
+  --line-bright: #35486e;
+  --text-primary: #eef2f9;
+  --text-muted: #8593ad;
+  --signal: #22e0a3;
+  --signal-dim: #14664d;
+  --earth: #c9a874;
+  --alert: #ff9d4d;
+}
+
+@theme inline {
+  --color-deep: var(--bg-deep);
+  --color-panel: var(--bg-panel);
+  --color-panel-raised: var(--bg-panel-raised);
+  --color-line: var(--line);
+  --color-line-bright: var(--line-bright);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-signal: var(--signal);
+  --color-signal-dim: var(--signal-dim);
+  --color-earth: var(--earth);
+  --color-alert: var(--alert);
+  --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-body: "Inter", ui-sans-serif, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+/* Signature element: radar sweep — used on the map crosshair and the
+   telemetry panel while an analysis is "in progress". Ties the UI back
+   to Sentinel-1 SAR, the platform's core data source. */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.radar-sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 300deg,
+    color-mix(in srgb, var(--signal) 55%, transparent) 355deg,
+    transparent 360deg
+  );
+  animation: radar-sweep 1.6s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--signal) 0%, transparent);
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+/* MapLibre control overrides to match the dark telemetry aesthetic */
+.maplibregl-ctrl-attrib {
+  background: color-mix(in srgb, var(--bg-panel) 70%, transparent) !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-data);
+  font-size: 10px !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--text-muted) !important;
+}
+
+.maplibregl-ctrl-scale {
+  background: color-mix(in srgb, var(--bg-panel) 80%, transparent) !important;
+  border-color: var(--line-bright) !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-data) !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-bright);
+  border-radius: 3px;
+}
