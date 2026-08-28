@@ -12,3 +12,10 @@ export type AnalysisResult = {
   builtUpPct: number;
   changeSinceLastPct: number;
 };
+
+export type TimeSeriesPoint = {
+  date: string;
+  ndvi: number;
+  ndwi: number;
+  floodExtentPct: number;
+};

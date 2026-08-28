@@ -9,6 +9,7 @@ type Props = {
   analysisLoading: boolean;
   analysisResult: AnalysisResult | null;
   aoiRing: LngLat[] | null;
+  onDownloadReport: () => void;
 };
 
 function SceneRow({ title, subtitle, loading }: { title: string; subtitle: string; loading?: boolean }) {
@@ -30,7 +31,7 @@ function SceneRow({ title, subtitle, loading }: { title: string; subtitle: strin
   );
 }
 
-export default function ScenesPanel({ hasArea, analysisLoading, analysisResult, aoiRing }: Props) {
+export default function ScenesPanel({ hasArea, analysisLoading, analysisResult, aoiRing, onDownloadReport }: Props) {
   const [search, setSearch] = useState("");
 
   const scenes = analysisResult
@@ -99,6 +100,28 @@ export default function ScenesPanel({ hasArea, analysisLoading, analysisResult, 
             ))}
           </div>
         )}
+      </div>
+
+      <div className="rounded-md border border-line bg-panel-raised/40 p-3">
+        <div className="mb-2 flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M6 3h9l4 4v14H6V3z" stroke="var(--text-muted)" strokeWidth="1.4" strokeLinejoin="round" />
+            <path d="M9 12h6M9 15.5h6M9 8.5h3" stroke="var(--text-muted)" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+          <p className="font-display text-xs font-semibold text-text-primary">Report</p>
+        </div>
+        <button
+          type="button"
+          disabled={!analysisResult}
+          onClick={onDownloadReport}
+          className="block w-full rounded-md border border-line-bright py-2 text-center text-xs font-semibold text-text-primary transition-colors hover:bg-panel-raised disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Download report (PDF)
+        </button>
+        <p className="mt-1.5 text-[10px] text-text-muted">
+          Opens your browser&apos;s print dialog — choose &ldquo;Save as
+          PDF&rdquo;.
+        </p>
       </div>
 
       <div className="rounded-md border border-line bg-panel-raised/40 p-3">

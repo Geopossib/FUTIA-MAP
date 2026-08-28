@@ -17,12 +17,28 @@ function ChevronDown() {
   );
 }
 
-export default function TopNav() {
+export default function TopNav({
+  onToggleControls,
+  onToggleScenes,
+}: {
+  onToggleControls: () => void;
+  onToggleScenes: () => void;
+}) {
   const [active, setActive] = useState("Home");
 
   return (
     <header className="relative z-30 flex h-14 shrink-0 items-center justify-between border-b border-line bg-panel px-4">
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onToggleControls}
+          title="Toggle controls panel"
+          className="mr-1 flex h-8 w-8 items-center justify-center rounded-md border border-line text-text-muted transition-colors hover:text-text-primary lg:hidden"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
         <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-signal to-water">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
@@ -68,7 +84,7 @@ export default function TopNav() {
         </button>
         <button
           type="button"
-          className="flex items-center gap-1.5 rounded-md border border-line px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:border-line-bright"
+          className="hidden items-center gap-1.5 rounded-md border border-line px-3 py-1.5 text-xs font-medium text-text-primary transition-colors hover:border-line-bright sm:flex"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
             <path
@@ -88,6 +104,18 @@ export default function TopNav() {
           Start Project
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
             <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={onToggleScenes}
+          title="Toggle scenes panel"
+          className="flex h-8 w-8 items-center justify-center rounded-md border border-line text-text-muted transition-colors hover:text-text-primary lg:hidden"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="4" width="18" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="3" y="10" width="18" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
+            <rect x="3" y="16" width="18" height="4" rx="1" stroke="currentColor" strokeWidth="1.6" />
           </svg>
         </button>
       </div>

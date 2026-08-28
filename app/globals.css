@@ -142,3 +142,12 @@ body {
   background: var(--line-bright);
   border-radius: 3px;
 }
+
+@media print {
+  body > *:not(#print-root) {
+    display: none !important;
+  }
+  #print-root {
+    display: block !important;
+  }
+}
