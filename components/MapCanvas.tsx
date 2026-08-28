@@ -14,10 +14,34 @@ import { ringAreaKm2, ringCentroid } from "@/lib/geo";
 
 const NIGERIA_CENTER: [number, number] = [8.05, 9.1];
 
+export type BasemapId = "dark" | "satellite";
+
 type Props = {
-  onAreaDrawn: (centroid: LngLat, areaKm2: number) => void;
+  basemap: BasemapId;
+  onAreaDrawn: (centroid: LngLat, areaKm2: number, ring: LngLat[]) => void;
   onAreaCleared: () => void;
   onCursorMove: (coords: LngLat | null) => void;
+};
+
+const BASEMAP_STYLES: Record<
+  BasemapId,
+  { tiles: string[]; attribution: string }
+> = {
+  dark: {
+    tiles: [
+      "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+      "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+      "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+    ],
+    attribution:
+      '&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap contributors',
+  },
+  satellite: {
+    tiles: [
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    ],
+    attribution: "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics",
+  },
 };
 
 // Draw styling tuned to the signal-green telemetry accent instead of
@@ -49,7 +73,7 @@ const drawStyles = [
   },
 ];
 
-export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: Props) {
+export default function MapCanvas({ basemap, onAreaDrawn, onAreaCleared, onCursorMove }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
@@ -57,26 +81,20 @@ export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    const initialStyle = BASEMAP_STYLES.dark;
     const map = new MapLibreMap({
       container: containerRef.current,
       style: {
         version: 8,
         sources: {
-          "carto-dark": {
+          basemap: {
             type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-              "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-              "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-            ],
+            tiles: initialStyle.tiles,
             tileSize: 256,
-            attribution:
-              '&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; OpenStreetMap contributors',
+            attribution: initialStyle.attribution,
           },
         },
-        layers: [
-          { id: "carto-dark-layer", type: "raster", source: "carto-dark" },
-        ],
+        layers: [{ id: "basemap-layer", type: "raster", source: "basemap" }],
       },
       center: NIGERIA_CENTER,
       zoom: 5.4,
@@ -84,7 +102,7 @@ export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: 
     });
 
     map.addControl(new AttributionControl({ compact: true }), "bottom-right");
-    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
     map.addControl(
       new ScaleControl({ maxWidth: 120, unit: "metric" }),
       "bottom-left"
@@ -114,7 +132,7 @@ export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: 
       const ring: LngLat[] = feature.geometry.coordinates[0].map(
         (position) => ({ lng: position[0], lat: position[1] })
       );
-      onAreaDrawn(ringCentroid(ring), ringAreaKm2(ring));
+      onAreaDrawn(ringCentroid(ring), ringAreaKm2(ring), ring);
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,6 +156,18 @@ export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Swap basemap tiles when the layers toggle changes.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+    const style = BASEMAP_STYLES[basemap];
+    const source = map.getSource("basemap") as maplibregl_RasterSource | undefined;
+    if (source && "setTiles" in source) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (source as any).setTiles(style.tiles);
+    }
+  }, [basemap]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -159,5 +189,25 @@ export default function MapCanvas({ onAreaDrawn, onAreaCleared, onCursorMove }: 
     return () => el?.removeEventListener("click", handler);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      const map = mapRef.current;
+      if (!map || !navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition((pos) => {
+        map.flyTo({
+          center: [pos.coords.longitude, pos.coords.latitude],
+          zoom: 11,
+        });
+      });
+    };
+    const el = document.getElementById("locate-trigger");
+    el?.addEventListener("click", handler);
+    return () => el?.removeEventListener("click", handler);
+  }, []);
+
   return <div ref={containerRef} className="absolute inset-0" />;
 }
+
+// Minimal structural type so we don't need MapLibre's internal raster
+// source class just to call setTiles().
+type maplibregl_RasterSource = { setTiles?: (tiles: string[]) => void };

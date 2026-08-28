@@ -13,6 +13,10 @@
   --signal-dim: #14664d;
   --earth: #c9a874;
   --alert: #ff9d4d;
+  --gold: #f2b84c;
+  --gold-dim: #7a5f22;
+  --water: #4da3ff;
+  --water-dim: #1c3f66;
 }
 
 @theme inline {
@@ -27,6 +31,10 @@
   --color-signal-dim: var(--signal-dim);
   --color-earth: var(--earth);
   --color-alert: var(--alert);
+  --color-gold: var(--gold);
+  --color-gold-dim: var(--gold-dim);
+  --color-water: var(--water);
+  --color-water-dim: var(--water-dim);
   --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
   --font-body: "Inter", ui-sans-serif, sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, monospace;
